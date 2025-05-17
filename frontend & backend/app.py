@@ -15,8 +15,8 @@ import random
 app = Flask(__name__, template_folder='templates', static_folder='static')
 #Define app
 app.secret_key = '1fb1c1341aa949b99b7b51d1f80122da'
-SPOTIPY_CLIENT_ID = 'd56cc98b51a74d9782b2fbb9ef68e1c9'
-SPOTIPY_CLIENT_SECRET = '1fb1c1341aa949b99b7b51d1f80122da'
+SPOTIPY_CLIENT_ID = ''
+SPOTIPY_CLIENT_SECRET = ''
 SPOTIPY_REDIRECT_URI = 'http://127.0.0.1:5000/callback'
 #Define authorization keys
 
