@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
+    <title>Search Music</title>
+
+    <style>
+        body {
+            margin: 0;
+            background-color: #68817d;
+        }
+
+        .topnav {
+            background-color: #454742;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+        }
+
+        .topnav a {
+            color: #f2f2f2;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+            font-size: 25px;
+        }
+
+        .topnav a:hover {
+            background-color: #B50C0F;
+            color: #0B020D;
+        }
+
+        .faq-label {
+                position: absolute;
+                top: 6px;
+                right: 20px;
+                background-color: #454742;
+                color: white;
+                padding: 10px 20px;
+                border-radius: 5px;
+                font-family: Impact, 'Arial Narrow Bold', sans-serif;
+                font-size: 16px;
+                text-decoration: none;
+            }
+
+        .logo {
+            position: absolute;
+            top: 6px;
+            left: 20px;
+            background-color: #454742;
+            color: #A4874F;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 20px;
+            text-shadow: 5px 0px black;
+        }
+
+        .searchForm {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .search {
+            display: flex;
+            align-items: center;
+            padding: 13px;
+            border-radius: 28px 0 0 28px;
+            background: #f6f6f6;
+        }
+
+        .search-icon {
+            color: rgba(0, 0, 0, 0.5);
+        }
+
+        .search-input {
+            font-size: 15px;
+            color: #333333;
+            margin-left: 10px;
+            outline: none;
+            border: none;
+            background: transparent;
+            width: 400px;
+        }
+
+        .dropdown {
+            position: relative;
+            margin-left: -4px;
+        }
+
+        .dropbtn {
+            border-radius: 0px 28px 28px 0px;
+            width: 106px;
+            padding: 16px;
+            border: none;
+            background-color: rgba(255, 255, 255, 0.602);
+            cursor: pointer;
+        }
+
+        .dropbtn:hover {
+            background-color: rgba(255, 255, 255, 0.446);
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #f9f9f9;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+            z-index: 1;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            font-size: 12px;
+        }
+
+        .dropdown-content a {
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            border-radius: 10px;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #f1f1f1;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        #title {
+            padding: 20px;
+            margin-left: 130px;
+            color: black;
+        }
+
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 16px;
+            border-bottom: 1px solid #f2f2f2;
+        }
+
+        th {
+            background-color: #454742;
+            color: white;
+            text-transform: uppercase;
+        }
+
+        tr:nth-child(even) {
+            background-color: rgba(242, 242, 242, 0.674);
+        }
+
+        tr:hover {
+            background-color: #b50c0f;
+            color: #0b020d;
+        }
+
+        td {
+            font-size: 16px;
+            color: #000000;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="topnav">
+        <a href="{{ url_for('searchpage') }}">search</a>
+        <!-- url_for navigates to specific routes defined in app.py -->
+        <a href="{{ url_for('musicgame') }}">music game</a>
+        <a href="{{ url_for('statspage') }}">stats for you</a>
+        <a href="{{ url_for('plgen') }}">playlist generator</a>
+        <a href="{{ url_for('upcomingevents') }}">upcoming events</a>
+    </div>
+    <!-- Logo and FAQ labels -->
+    <a href="{{ url_for('faq') }}" class="faq-label">FAQ / How to Use</a>
+    <a class="logo" href="{{ url_for('home') }}"><b>Track'r</b></a>
+    <br><br><br>
+
+    <form id="searchForm" class="searchForm">
+        <div class="search">
+            <span class="search-icon material-symbols-outlined">search</span>
+            <input id="searchInput" class="search-input" type="text" name="user_input" placeholder="Search your music"
+                maxlength="25">
+        </div>
+        <div class="dropdown">
+            <button class="dropbtn">search by</button>
+            <div class="dropdown-content">
+                <a href="#" data-search="track">song</a>
+                <a href="#" data-search="artist">artist</a>
+            </div>
+        </div>
+    </form>
+
+    <br>
+
+    <h1 id="title">Recommendations will display below</h1>
+    <div id="recommendations">
+        <table id="songTable" style="font-weight: bold;">
+            <thead>
+                <tr>
+                    <th>Song</th>
+                    <th>Artist</th>
+                    <th>Album</th>
+                    <th>Duration</th>
+                </tr>
+            </thead>
+            <tbody>
+
+            </tbody>
+        </table>
+
+        <table id="artistTable" style="display: none; font-weight: bold;">
+            <thead>
+                <tr>
+                    <th>Artist name</th>
+                    <th>Artist genres</th>
+
+                </tr>
+            </thead>
+            <tbody>
+
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        let searchType = '';
+        // Attaches click event listeners to all elements inside dropdown.
+        // Updates elements based on the selected option and updates search parameters.
+        document.querySelectorAll('.dropdown-content a').forEach(item => {
+            item.addEventListener('click', event => {
+                event.preventDefault();
+                document.querySelector('.dropbtn').textContent = event.target.textContent;
+                document.getElementById('searchInput').placeholder = `Search your music by ${event.target.textContent}`;
+
+                // Updates the searchType variable with the selected option
+                searchType = event.target.getAttribute('data-search');
+                document.getElementById('searchForm').setAttribute('data-search', searchType);
+            });
+        });
+
+        //Handles form submission for searching either tracks or artists.
+        document.getElementById('searchForm').addEventListener('submit', async function (event) {
+            event.preventDefault();
+            const userInput = document.getElementById('searchInput').value;
+            const searchType = event.target.getAttribute('data-search');
+
+            // Fetches data from '/search' endpoint based on user input and search type
+            const response = await fetch('/search', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams({
+                    'searchInput': userInput,
+                    'searchType': searchType
+                })
+            });
+
+            const data = await response.json();
+
+            //displaying recommended songs or related artists based on search type
+            if (searchType === 'track') {
+                const recommendationsTable = document.getElementById('songTable');
+                recommendationsTable.style.display = 'table'
+                document.getElementById('artistTable').style.display = 'none'
+                const tbody = recommendationsTable.querySelector('tbody');
+                tbody.innerHTML = '';
+
+                // Populate table with recommended songs
+                data.recommended_songs.forEach(song => {
+                    const row = tbody.insertRow();
+
+                    let trackLink = document.createElement('a');
+                    trackLink.href = song.song_link;
+                    trackLink.textContent = song.track_name;
+                    trackLink.target = '_blank';
+                    trackLink.style.textDecoration = 'none'
+                    row.insertCell().appendChild(trackLink);
+
+                    row.insertCell().textContent = song.artist_name;
+                    row.insertCell().textContent = song.album_name;
+
+                    let durationInMinutes = song.track_duration / 60000;
+                    let wholeMinutes = Math.floor(durationInMinutes);
+                    let fractionalMinutes = durationInMinutes - wholeMinutes;
+                    let seconds = Math.round(fractionalMinutes * 60);
+                    let formattedDuration = `${wholeMinutes}:${seconds.toString().padStart(2, '0')}`;
+
+                    row.insertCell().textContent = formattedDuration;
+                });
+
+
+                document.getElementById('title').textContent = `Songs similar to '${userInput}':`;
+            } else if (searchType === 'artist') {
+                const recommendationsTable = document.getElementById('artistTable');
+                recommendationsTable.style.display = 'table'
+                document.getElementById('songTable').style.display = 'none'
+                const tbody = recommendationsTable.querySelector('tbody');
+                tbody.innerHTML = '';
+
+                // Populate table with related artists
+                data.related_artists.forEach(artist => {
+                    const row = tbody.insertRow();
+                    row.insertCell().textContent = artist.name;
+                    row.insertCell().textContent = artist.genres.join(', ');
+                })
+
+                document.getElementById('title').textContent = `Artists similar to '${userInput}':`;
+            }
+        });
+    </script>
+
+</body>
+
+</html>

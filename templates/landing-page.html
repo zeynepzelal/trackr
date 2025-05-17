@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="eng">
+    <head>
+        <meta charset="UTF-8">
+    </head>
+
+    <body>
+            <!-- Login and Logout Buttons -->
+            <div id="logging">
+                <a id="spotify-login-btn" href="{{ url_for('login' )}}" style="text-decoration: none;">Login with your Spotify <img src="{{ url_for('static', filename='spotify-logo.png') }}" alt="spotify logo" style="width: 30px; margin-left: 5px; margin-right: 2px;"></a>
+                <button id="logout-button" onclick='reload()' style="text-decoration: none; display: none;">Logout</button>
+            </div>
+            <h1 id="main-title">Track'r</h1>
+            <div class="spotify-login"></div>
+
+            <a id="click-search-btn" href="{{ url_for('searchpage') }}" >Click to get started on your journey</a>
+            
+            <!-- Song of the Day Display -->
+            <div class="song-of-the-day" id="songotd">Log-in to see your song of the day.</div>
+
+        <script>
+
+            let loggedIn = false
+
+            if (!loggedIn) {
+                document.getElementById('click-search-btn').href = '{{ url_for("login") }}'
+            }
+
+            async function loginlogoutChanger() {
+                await getSongOTD()
+                const logOutButton = document.getElementById('logout-button')
+                const logInButton = document.getElementById('spotify-login-btn')
+                const songOTDdiv = document.getElementById('songotd')
+                if (songOTDdiv.textContent.length > 17) {
+                    logInButton.style.display = 'none'
+                    logOutButton.style.display = 'block'
+                    document.getElementById('click-search-btn').href = '{{ url_for("searchpage") }}'
+                    loggedIn = true
+                } else {
+                    logOutButton.style.display = 'none'
+                    logInButton.style.display = 'block'
+                    loggedIn = false
+                }
+            }
+            
+            // Logout function to call the server and remove tokens from local storage
+            async function logOut() {
+                const logOutCall = await fetch('/logout', {
+                method: 'GET', // or 'POST' depending on your Flask route setup
+                credentials: 'same-origin' // Include credentials (cookies) in the request
+                });
+                localStorage.removeItem('spotify_access_key')
+                sessionStorage.removeItem('spotify_access_key')
+
+                if (logOutCall.redirected) {
+                // Manually follow the redirect (optional depending on your needs)
+                window.location.href = logOutCall.url;
+                }
+            }
+
+            async function reload() {
+                await logOut()
+                location.reload(true)
+            }
+
+
+            // Function to change the placeholder text of the search input
+            function changePlaceholder(text) {
+            document.getElementById('search-input').placeholder = "Search your music by "+text;
+            document.getElementById('search-type').value = text;
+            }
+            
+            // Function to fetch and display the song of the day
+            async function getSongOTD() {
+                const response = await fetch('/getsongoftheday')
+                if (!response.ok) {
+                throw new Error('Network response was not ok');
+                }
+                const songOTDjson = await response.json()
+
+                let song_name = songOTDjson['name']
+                let artist_name = songOTDjson['artists']
+
+                document.getElementById('songotd').textContent = 'Song of the day: ' + song_name + ' - ' + artist_name
+            }
+
+            // Call the async function 'loginlogoutChanger()' which also calls
+            //the 'getSongOTD()' function to get the song of the day when the page loads
+            window.onload = () => {
+                loginlogoutChanger()
+            }
+
+        </script>
+
+        <!-- Tools Section -->
+        <div class="tools">          
+            <a href="{{ url_for('musicgame') }}" class="tool-btn" id="game-btn"><img class="tool-img" src="{{ url_for('static', filename='red-icon.png') }}" style="width: 168%;"></a>
+
+            <a href="{{ url_for('statspage') }}" class="tool-btn" id="stats-btn"><img class="tool-img" src="{{ url_for('static', filename='green-icon.png') }}" style="width: 168%;"></a>
+            
+            <a href="{{ url_for('plgen') }}" class="tool-btn" id="pl-generator"><img class="tool-img" src="{{ url_for('static', filename='brown-icon.png') }}" style="width: 168%;"></a>
+
+            <a href="{{ url_for('upcomingevents') }}" class="tool-btn" id="pl-generator"><img class="tool-img" src="{{ url_for('static', filename='grey-icon.png') }}" style="width: 168%;"></a>
+        </div>
+
+        <style>
+        body {
+            margin: 0;
+            background-size: cover;
+            background-image: url('static/background.jpg');
+            height: 550px;
+            font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        #main-title {
+        font-size: 50px;
+        margin-top: 140px;
+        margin-left: auto;
+        margin-right: auto;
+        display: block;
+        width: 100px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        color: #A4874F;
+        text-shadow: 5px 5px rgb(19, 18, 18);
+        width: 175px;
+        }
+
+        #logging {
+        display: flex;
+        }
+
+
+        #spotify-login-btn {
+        width: 210px;
+        padding: 9px;
+        background-color:#fffdfd;
+        border: 1px solid #ccc;
+        border-radius: 28px;
+        box-sizing: border-box;
+        justify-content: center;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        margin-top: 10px;
+        color: black;
+        margin-left: 10px;
+        font-size: 15px;
+        }
+
+        #spotify-login-btn:hover {
+            background-color: rgb(43, 112, 43);
+            border-color: #B50C0F;
+        }
+
+        #logout-button {
+        width: 100px;
+        padding: 9px;
+        background-color:#fffdfd;
+        border: 1px solid #ccc;
+        border-radius: 28px;
+        box-sizing: border-box;
+        justify-content: center;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        margin-top: 10px;
+        color: black;
+        margin-left: 10px;
+        font-size: 15px;
+        right: 10px;
+        top: 10px;
+        }
+
+        #click-search-btn {
+        width: 400px;
+        padding: 20px;
+        background-color: #B50C0F;
+        border: none;
+        border-radius: 30px;
+        box-sizing: border-box;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        font-size: 20px;
+        text-decoration: none;
+        display: grid;
+        place-content: center;
+        color: rgba(0, 0, 0, 0.74);
+        }
+
+        #click-search-btn:hover {
+            box-shadow: 5px rgb(0, 0, 0);
+        }
+
+        .song-of-the-day {
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 10px;
+        font-weight: bold;
+        justify-content: center;
+        display: block;
+        width: fit-content;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        color: #D3EBE3;
+        text-shadow: 0px 2px 3px rgb(162, 76, 52);
+        }
+
+        .tools {
+        background-color: #68817D;
+        margin-top: 215px;
+        display: flex;
+        justify-content: center;
+        height: calc(100vh - 550px)
+        }
+
+        .tool-btn {
+        height: 140px;
+        width: 140px;
+        border-radius: 50%;
+        margin: 10px auto;
+        border: none;
+        background-color: #A4874F;
+        display: flex;
+        flex-direction: column;
+        font-family: inherit;
+        place-items: center;
+        align-items: center;
+        text-align: center;
+        background-size: 168%;
+        background-position: center;
+        background-repeat: no-repeat;
+        place-content: center;
+        text-decoration: none;
+        color: #f1f1f1;
+        }
+        
+        .tool-btn:hover {
+        box-shadow: 10px 5px #A4874F;
+        }
+
+        #logout-button:hover {
+            cursor: pointer;
+            background-color: rgb(43, 112, 43);
+            border-color: #B50C0F;
+        }
+
+        </style>
+
+        
+    </body>
+
+</html>

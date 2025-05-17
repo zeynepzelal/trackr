@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Track'r - Upcoming Events</title>
+</head>
+<body>
+
+    <style>
+        /* Reset and general styles */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #68817D;
+            color: #fff;
+            text-align: center;
+        }
+
+        .topnav {
+            font-family: 'Times New Roman', Times, serif;
+            background-color: #454742;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+        }
+
+    .topnav a {
+        color: #f2f2f2;
+        text-align: center;
+        padding: 14px 16px;
+        text-decoration: none;
+        font-size: 25px;
+    }
+
+    .topnav a:hover {
+        background-color: #B50C0F;
+        color: #0B020D;
+    }
+
+    .faq-label {
+            position: absolute;
+            top: 6px;
+            right: 20px;
+            background-color: #454742;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-family: Impact, 'Arial Narrow Bold', sans-serif;
+            font-size: 16px;
+            text-decoration: none;
+        }
+
+    .logo {
+        position: absolute;
+        top: 6px;
+        left: 20px;
+        background-color: #454742;
+        color: #A4874F;
+        padding: 10px 20px;
+        border-radius: 5px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-size: 20px;
+        text-shadow: 5px 0px black;
+    }
+
+        .content {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+
+        /* Artist events styling */
+        .artist-container {
+            margin-bottom: 30px;
+        }
+
+        .artist-container h2 {
+            font-size: 28px;
+            color: #B50C0F;
+            margin-bottom: 10px;
+        }
+
+        .artist-container ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .artist-container li {
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 10px 20px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+
+        .artist-container li div {
+            margin-bottom: 6px;
+        }
+
+        .artist-container li a {
+            color: #B50C0F;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .artist-container li a:hover {
+            text-decoration: underline;
+        }
+
+        /* Location events styling */
+        .events-container ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .events-container li {
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 10px 20px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+
+        .events-container li div {
+            margin-bottom: 6px;
+        }
+
+        .events-container li a {
+            color: #B50C0F;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .events-container li a:hover {
+            text-decoration: underline;
+        }
+    </style>
+
+</head>
+<body>
+
+    <div class="topnav">
+        <a href="{{ url_for('searchpage') }}">search</a>
+        <!-- url_for navigates to specific routes defined in app.py -->
+        <a href="{{ url_for('musicgame') }}">music game</a>
+        <a href="{{ url_for('statspage') }}">stats for you</a>
+        <a href="{{ url_for('plgen') }}">playlist generator</a>
+        <a href="{{ url_for('upcomingevents') }}">upcoming events</a>
+    </div>
+    <!-- Logo and FAQ labels -->
+    <a href="{{ url_for('faq') }}" class="faq-label">FAQ / How to Use</a>
+    <a class="logo" href="{{ url_for('home') }}"><b>Track'r</b></a>
+
+    <div class="content">
+        <div class="section">
+            <h1>Upcoming Events of Your Top Artists</h1>
+            <div id="artist-events-cont">
+                <!-- Events for each artist will be dynamically added here -->
+            </div>
+        </div>
+        
+        <div class="section">
+            <h1>Upcoming Events Near You</h1>
+            <div id="location-events-cont">
+                <!-- Location-based events will be dynamically added here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+async function fetchArtistEvents() {
+    try {
+        const response = await fetch(`/artist-events`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const artistEvents = await response.json();
+
+        artistEvents.forEach(event => {
+            const artistName = event.artist;
+            const events = event.events;
+
+            // Only proceed if there are events for the artist
+            if (events.length > 0) {
+                // Create a container for each artist's events
+                const artistContainer = document.createElement('div');
+                artistContainer.classList.add('artist-container');
+
+                // Add artist name to the container
+                const artistHeading = document.createElement('h2');
+                artistHeading.textContent = `Events for `;
+
+                const redArtistName = document.createElement('span')
+                redArtistName.textContent = artistName
+                redArtistName.style.color = '#B50C0F'
+                redArtistName.style.textShadow = '#880000 4px 4px'
+                artistHeading.appendChild(redArtistName)
+
+                artistContainer.appendChild(artistHeading);
+
+                // Create a list for events
+                const eventsList = document.createElement('ul');
+
+                // Iterate through events and create list items
+                events.forEach(event => {
+                    const eventItem = document.createElement('li');
+                    
+                    // Event name and date
+                    const eventNameDate = document.createElement('div');
+                    eventNameDate.textContent = `${event.name} - ${event.dates.start.localDate}`;
+                    eventItem.appendChild(eventNameDate);
+
+                    // Venue and city
+                    if (event._embedded && event._embedded.venues && event._embedded.venues.length > 0) {
+                        const venue = event._embedded.venues[0];
+                        const venueCity = document.createElement('div');
+                        venueCity.textContent = `${venue.name}, ${venue.city.name}`;
+                        eventItem.appendChild(venueCity);
+                    }
+
+                    // Event link if available
+                    if (event.url) {
+                        const eventLink = document.createElement('a');
+                        eventLink.href = event.url;
+                        eventLink.textContent = 'Event Website';
+                        eventLink.target = '_blank'; // Open link in a new tab
+                        eventItem.appendChild(eventLink);
+                    }
+
+                    eventsList.appendChild(eventItem);
+                });
+
+                // Add events list to the container
+                artistContainer.appendChild(eventsList);
+
+                // Append the container to the main events container
+                document.getElementById('artist-events-cont').appendChild(artistContainer);
+            }
+        });
+    } catch (error) {
+        console.error('Error fetching artist events:', error);
+        // Display an error message on the page
+        const errorContainer = document.createElement('div');
+        errorContainer.textContent = `Error fetching artist events: ${error.message}`;
+        document.getElementById('artist-events-cont').appendChild(errorContainer);
+    }
+}
+
+async function getLocation() {
+    return new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(
+            position => {
+                const { latitude, longitude } = position.coords;
+                resolve({ lat: latitude, long: longitude });
+            },
+            error => {
+                reject(error);
+            }
+        );
+    });
+}
+
+async function fetchLocationEvents() {
+    try {
+        const {lat, long} = await getLocation()
+        
+        const response = await fetch(`/location-events?lat=${lat}&long=${long}`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const events = await response.json();
+
+        // Clear previous content in case of re-fetching
+        const locationEventsContainer = document.getElementById('location-events-cont');
+        locationEventsContainer.innerHTML = '';
+
+        // Create a container for events
+        const eventsContainer = document.createElement('div');
+        eventsContainer.classList.add('events-container');
+
+
+        // Create a list for events
+        const eventsList = document.createElement('ul');
+
+        // Iterate through events and create list items
+        events.forEach(event => {
+            const eventItem = document.createElement('li');
+            
+            // Event name and date
+            const eventNameDate = document.createElement('div');
+            eventNameDate.textContent = `${event.name} - ${event.dates.start.localDate}`;
+            eventItem.appendChild(eventNameDate);
+
+            // Venue and city
+            if (event._embedded && event._embedded.venues && event._embedded.venues.length > 0) {
+                const venue = event._embedded.venues[0];
+                const venueCity = document.createElement('div');
+                if (venue.name) {
+                    venueName = venue.name
+                } else {
+                    venueName = 'Unknown venue'
+                }
+                venueCity.textContent = `${venueName}, ${venue.city.name}`;
+                eventItem.appendChild(venueCity);
+            }
+
+            // Event link if available
+            if (event.url) {
+                const eventLink = document.createElement('a');
+                eventLink.href = event.url;
+                eventLink.textContent = 'Event Website';
+                eventLink.target = '_blank'; // Open link in a new tab
+                eventItem.appendChild(eventLink);
+            }
+
+            eventsList.appendChild(eventItem);
+        });
+
+        // Add events list to the container
+        eventsContainer.appendChild(eventsList);
+
+        // Append the container to the main events container
+        locationEventsContainer.appendChild(eventsContainer);
+    } catch (error) {
+        console.error('Error fetching location events:', error);
+        // Display an error message on the page if needed
+        const errorContainer = document.createElement('div');
+        errorContainer.textContent = `Error fetching location events: ${error.message}`;
+        const locationEventsContainer = document.getElementById('location-events-cont');
+        locationEventsContainer.appendChild(errorContainer);
+    }
+}
+
+window.onload = () => {
+    fetchArtistEvents()
+    fetchLocationEvents()
+}
+
+    </script>
+</body>
+</html>

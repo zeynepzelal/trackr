@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Would You Rather</title>
+    <style>
+    body, html {
+        height: 100%;
+        margin: 0;
+        background-color: #68817D;
+    }
+
+    .wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .container {
+        text-align: center;
+    }
+
+    .hidden {
+        opacity: 0;
+    }
+
+    .fade-in {
+        animation: fadeIn 2s forwards;
+    }
+
+    @keyframes fadeIn {
+        0% {
+            opacity: 0;
+        }
+        100% {
+            opacity: 1;
+        }
+    }
+
+    #options {
+        margin-top: 20px;
+        display: flex;
+        justify-content: space-around;
+        opacity: 0;
+    }
+
+    #options.fade-in {
+        animation: fadeIn 2s 2s forwards;
+    }
+
+    .option {
+        background-color: #454742;
+        border-bottom: 6px solid #B50C0F;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        color: white;
+        padding: 15px 30px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: transform 0.3s, opacity 0.3s;
+        margin: 20px;
+        text-align: center;
+    }
+
+    .subtext {
+        margin-top: 10px;
+        font-size: 14px;
+        color: white;
+    }
+
+    .option:hover {
+        transform: scale(1.1);
+    }
+
+    .option:hover img {
+        filter: sepia(100%) brightness(105%) contrast(120%) drop-shadow(4px 4px 8px rgba(0, 0, 0, 0.5)) opacity(0.7);
+    }
+
+    .optionIntroAnim {
+        animation: flashRednGrow 1s infinite alternate;
+    }
+
+    @keyframes flashRednGrow {
+        0% {
+            background-color: #454742;
+            transform: scale(1.0);
+        }
+        100% {
+            background-color: rgb(32, 180, 32);
+            transform: scale(1.1);
+        }
+    }
+
+    .option.fade-out {
+        animation: fadeOut 1s forwards;
+    }
+
+    @keyframes fadeOut {
+        0% {
+            opacity: 1;
+        }
+        100% {
+            opacity: 0;
+            transform: scale(0.5);
+        }
+    }
+
+    .fade-out {
+    animation: fadeOut 2s forwards;
+    }
+
+    @keyframes fadeOut {
+        0% {
+            opacity: 1;
+        }
+        100% {
+            opacity: 0;
+        }
+    }
+
+    .topnav {
+        background-color: #454742;
+        display: flex;
+        justify-content: center;
+        align-items: flex-end;
+    }
+
+    .topnav a {
+        color: #f2f2f2;
+        text-align: center;
+        padding: 14px 16px;
+        text-decoration: none;
+        font-size: 25px;
+    }
+
+    .topnav a:hover {
+        background-color: #B50C0F;
+        color: #0B020D;
+    }
+
+    .faq-label {
+        position: absolute;
+        top: 6px;
+        right: 20px;
+        background-color: #454742;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        font-family: Impact, 'Arial Narrow Bold', sans-serif;
+        font-size: 16px;
+        text-decoration: none;
+        }
+
+    .logo {
+        position: absolute;
+        top: 6px;
+        left: 20px;
+        background-color: #454742;
+        color: #A4874F;
+        padding: 10px 20px;
+        border-radius: 5px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-size: 20px;
+        text-shadow: 5px 0px black;
+    }
+
+    </style>
+</head>
+<body>
+    <!-- Top navigator by default (same in every page) -->
+    <!-- url_for navigates to specific routes defined in app.py -->
+    <div class="topnav">
+        <a href="{{ url_for('searchpage') }}">search</a>
+        <!-- url_for navigates to specific routes defined in app.py -->
+        <a href="{{ url_for('musicgame') }}">music game</a>
+        <a href="{{ url_for('statspage') }}">stats for you</a>
+        <a href="{{ url_for('plgen') }}">playlist generator</a>
+        <a href="{{ url_for('upcomingevents') }}">upcoming events</a>
+    </div>
+    <!-- Logo and FAQ labels -->
+    <a href="{{ url_for('faq') }}" class="faq-label">FAQ / How to Use</a>
+    <a class="logo" href="{{ url_for('home') }}"><b>Track'r</b></a>
+    <br><br><br><br><br><br><br><br><br><br>
+    <div class="wrapper">
+    <div class="container">
+        <div id="intro-text" class="hidden" style="font-size: 30px; font-weight: bold; justify-content: center;">Welcome to "Would You Rather"</div>
+        <div id="options" class="hidden">
+            <div class="option" id="option1">Option 1</div>
+            <div class="option" id="option2">Option 2</div>
+        </div>
+        <br><br><br>
+        <div id="countdown"></div>
+    </div>
+    <script>
+
+        async function fetchTrackDetails2() {
+            /* fetches track details via spotify api.
+            async function as data is awaited.
+            returns: topTracks -> an array containing track objects with specific properties */
+            try {
+            /*'try' for error handling */
+                const response = await fetch(`/getstats?time_range=long_term&limit=21`);
+                /* awaits API response with SPECIFIC time range and limit (top 21 songs) */
+                const topTrackDetails = await response.json();
+                /* defines track details as json form of 'response' */
+
+                const topTracks = []
+                /* initialize top tracks array as empty array */
+
+                topTrackDetails.forEach(track => {
+                /* iterate through top track details (data fetched, in form of json) */
+                    tempObj = {
+                        'name': track.name,
+                        'album_cover': track.album_cover,
+                        'artists': track.artists,
+                        'link': track.song_link
+                    }
+                    /* create a temporary object with specified properties */
+                    topTracks.push(tempObj)
+                    /* add the temporary object to the topTracks array so it contains the object. */
+
+                });
+                return topTracks
+
+            } catch (error) {
+                console.error('Error fetching track details:', error);
+            }
+        }
+
+    document.addEventListener("DOMContentLoaded", async function() {
+    /* wait for the whole HTML file to be loaded */
+    const top21Tracks = await fetchTrackDetails2()
+    /* set top21Tracks array to be the return of fetchTrackDetails2() */
+
+    const introText = document.getElementById('intro-text')
+    const optionsContainer = document.getElementById('options')
+    const option1 = document.getElementById('option1')
+    const option2 = document.getElementById('option2')
+    const countdownDisplay = document.getElementById('countdown')
+    /* get document id's of divs and paragraphs for initialization */
+
+    let songCount = 20
+    /* initialize songCount
+    (initialized as 20 instead of 21, as displaying 'remaining songs' will display AFTER first selection is made) */
+
+    introText.classList.remove('hidden')
+    introText.classList.add('fade-in')
+    /* add fade in animation for introText */
+
+    const flashInterval = setInterval(() => {
+        option1.classList.toggle('optionIntroAnim')
+        option2.classList.toggle('optionIntroAnim')
+    }, 1000)
+    /* flashInterval initializes a green-flashing animation interval for the options as the intro animation progresses */
+
+    setTimeout(() => {
+        optionsContainer.classList.remove('hidden')
+        optionsContainer.classList.add('fade-in')
+    }, 4000)
+    /* fade in options during the intro animation */
+
+    function updateCountdown() {
+        /* function to update the countdown of songs remaining */
+        if (songCount > 0) {
+        /* condition for the function to only update song decrementation if selection ISN'T over */
+        countdownDisplay.innerHTML = `<b>Songs remaining: ${songCount}</b>`
+        /* update display text by setting its innerHTML */
+        } else {
+            countdownDisplay.innerHTML = 'Click to play!'
+            /* if selection of options is over, winner track can be played upon being clicked on. */
+        }
+    }
+
+    setTimeout(() => {
+        introText.classList.remove('fade-in')
+        introText.classList.add('fade-out')
+    }, 2000)
+    /* fade out and fade in intro text as it changes during the intro animation */
+
+    setTimeout(() => {
+        introText.classList.remove('fade-out')
+        introText.classList.add('fade-in')
+        introText.innerHTML = ''
+        typeText(introText, 'In this minigame; your goal is to pick which song you would choose over another, based on your top tracks.');
+    }, 4000)
+    /* fade out and fade in intro text as it changes during the intro animation.
+    typeText() function is called (an animation function) */
+
+    setTimeout(() => {
+        optionsContainer.classList.remove('hidden')
+        optionsContainer.classList.add('fade-in')
+    }, 8000)
+    /* options fade out during intro animation. */
+
+    setTimeout(() => {
+        clearInterval(flashInterval)
+        option1.classList.remove('optionIntroAnim')
+        option2.classList.remove('optionIntroAnim')
+        optionsContainer.classList.remove('fade-in')
+        optionsContainer.classList.add('fade-out')
+    }, 13000)
+    /* stops the flashing green effect of the options and removes them from the optionIntroAnim class so the option1 and option2
+    divs can be worked with later on. */
+
+    setTimeout(() => {
+        introText.textContent = 'Good luck!'
+    }, 15000)
+    /* update introText during intro animation */
+
+    setTimeout(() => {
+        introText.classList.remove('fade-in')
+        introText.classList.add('fade-out')
+    }, 17000)
+    /* introText fade out during intro animation */
+
+    setTimeout(() => {
+        introText.classList.remove('fade-out')
+        introText.classList.add('fade-in')
+        introText.style.color = 'black'
+        introText.style.textShadow = '#A4874F 2px 5px'
+        introText.textContent = 'Would you rather?'
+    }, 19000)
+    /* fade in introText one last time, and set it to 'Would you Rather?'. this text won't be changed again until game is over. */
+
+    let optionIteration = 1
+    /* initialize iteration of selections of the would you rather game as 1 (not 0, as two iterations of option showings are done
+    in the first iteration, and from then on only one option showing iteration is done. this number is 1 to prevent repetition
+    of the same track after first selection.) */
+    setTimeout(() => {
+    optionsContainer.addEventListener('click', function(event) {
+    /* add an event listener of click for the options */
+        let selectedOption
+        /* initialize selectedOption variable */
+        if (event.target.classList.contains('option')) {
+        /* to make sure an option turns into the selected option if user clicks on the BUTTON (not its contents) */
+            selectedOption = event.target
+            /* sets selectedOption as described above ^ */
+        } else if (event.target.tagName === 'IMG' && event.target.parentElement.classList.contains('option')) {
+        /* to make sure an option turns into the selected option if user clicks on CONTENTS inside the button (image/album cover) */
+            selectedOption = event.target.parentElement
+            /* sets selectedOption as described above ^ */
+        }
+        const otherOption = selectedOption.id === 'option1' ? option2 : option1
+        /* defines the non-selected a.k.a. 'other' option */
+        optionIteration++
+        /* increment iteration count */
+        songCount--
+        /* decrment remaining song amount */
+        updateCountdown()
+        /* update the countdown of remaining songs after decrementing remaining song amount */
+
+        otherOption.classList.add('fade-out');
+        /* if an option is not selected, (a.k.a. it is the 'other' option), it fades out */
+        if (optionIteration < 21) {
+            /* if iteration is below the maximum song amount */
+            setTimeout(() => {
+                otherOption.classList.remove('fade-out')
+                /* remove fade-out of otherOption */
+                let newTrackName = top21Tracks[optionIteration].name
+                let newTrackImage = top21Tracks[optionIteration].album_cover
+                let newTrackArtist = top21Tracks[optionIteration].artists
+                /* define a newer track to be the next selection after an option is chosen. (if user picks one between A and B,
+                a new option C is created via the fetching of top tracks. this defines that option C) */
+                otherOption.innerHTML = `<img src="${newTrackImage}" style="width: 200px; height: 200px"><br><br><b>${newTrackName}
+                    </b><br><span style="font-size: 14px"><i>${newTrackArtist}</i></span>`
+                    /* set the innerHTML of newer option with object properties defined above. */
+                otherOption.classList.add('hidden')
+                otherOption.classList.remove('hidden')
+                otherOption.classList.add('fade-in')
+                /* fade in the newer option */
+            }, 1000)
+        } else {
+        /* if selection period is over (the game is complete) */
+            optionsContainer.removeChild(otherOption)
+            /* remove the otherOption child from the container of options */
+            const parser = new DOMParser()
+            /* initialize a parser */
+            const parsedHTML = parser.parseFromString(selectedOption.innerHTML, 'text/html')
+            /* parse the string data of the final selectedOption */
+            const winnerTrackName = parsedHTML.querySelector('b').textContent.trim()
+            /* find the track name as it is BOLDED. querySelector('b') finds the bolded track name and therefore
+            it can trim the rest of the innerHTML, leaving only the track name. */
+            const winnerTrack = top21Tracks.find(track => track.name === winnerTrackName)
+            /* define winner track by using find() in the top21Tracks array with the found winner track name */
+            selectedOption.margin = '0 auto'
+            selectedOption.padding = '15px 30px'
+            /* move final remaining option (the winner) into the middle */
+            introText.textContent = 'We have a winner!'
+            /* notify user the game has concluded and there is a winner track */
+            selectedOption.addEventListener('click', () => {
+                window.open(winnerTrack.link, '_blank')
+                /* upon clicking the winner track, user is sent to its link to play on spotify. */
+            })
+        }
+    })}, 19000)
+
+    setTimeout(() => {
+        optionsContainer.classList.remove('fade-out')
+        optionsContainer.classList.add('fade-in')
+        option1.innerHTML = `<img src="${top21Tracks[0].album_cover}" style="width: 200px; height: 200px"><br><br><b>${top21Tracks[0].name}</b><br><span style="font-size: 14px"><i>${top21Tracks[0].artists}</i></span>`
+        option2.innerHTML = `<img src="${top21Tracks[1].album_cover}" style="width: 200px; height: 200px"><br><br><b>${top21Tracks[1].name}</b><br><span style="font-size: 14px"><i>${top21Tracks[1].artists}</i></span>`
+    }, 20000)
+    /* after animation is complete, present user with the first two tracks/options to be selected. */
+})
+
+function typeText(element, text) {
+    /* function for animation during the intro animation phase.
+    this function creates an 'animation' by adding each letter of the full text to the display text one by one.
+    input: element -> the document element the function will work on
+    input: text -> the full text that the animation will slowly display */
+
+    let index = 0
+    /* initialize index as 0 */
+    let delay = 20
+    /* set the delay to 20ms, so each letter is added after 20ms of eachother */
+    const interval = setInterval(() => {
+    /* define interval for the animation to run constantly until text is over */
+        if (index < text.length) {
+        /* make sure animation 'stops' after the full text has been written */
+            if (index == 33 || index == 80) {
+                element.innerHTML += '<br>'
+                /* go to the next line during the animation. this is done for better visual representation. */
+            } else {
+            element.innerHTML += text.charAt(index)
+            /* add the specific character at the index to the displaying text (element) */
+            }
+            index++
+            /* increment index after each iteration */
+        } else {
+            clearInterval(interval)
+            /* clear interval if animation is done */
+        }
+    }, delay) /* this makes it so that the interval runs every 20ms with specified delay. (delay is 20ms as described above.) */
+}
+</script>
+</div>
+</body>
+</html>

@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Track'r Playlist Generator</title>
+    <style>
+        body {
+            background-color: #68817D;
+            margin: 0;
+            font-size: 16px;
+            color: white;
+            text-shadow: 1px 1px 2px black;
+        }
+
+        #songCount {
+            color: #B50C0F;
+        }
+
+        .topnav {
+            background-color: #454742;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+        }
+
+        .topnav a {
+            color: #f2f2f2;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+            font-size: 25px;
+        }
+
+        .topnav a:hover {
+            background-color: #B50C0F;
+            color: #0B020D;
+        }
+
+        .faq-label {
+            position: absolute;
+            top: 6px;
+            right: 20px;
+            background-color: #454742;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-family: Impact, 'Arial Narrow Bold', sans-serif;
+            font-size: 16px;
+            text-decoration: none;
+        }
+
+        .logo {
+            position: absolute;
+            top: 6px;
+            left: 20px;
+            background-color: #454742;
+            color: #A4874F;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 20px;
+            text-shadow: 5px 0px black;
+        }
+
+        .title {
+            color: white;
+            text-align: center;
+            text-shadow: 1px 1px 2px black;
+        }
+
+        .content {
+            margin-left: 50px;
+            width: 60%;
+            float: left;
+        }
+
+        .playlist-container {
+            width: 30%;
+            margin-right: 50px;
+            float: right;
+            display: none;
+        }
+
+        .button,
+        .radio_button {
+            padding: 10px 20px;
+            border: none;
+            border-bottom: 6px solid #B50C0F;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            color: white;
+            background-color: #454742;
+            transition: background-color 0.4s ease;
+            margin-bottom: 10px;
+            margin-right: 10px;
+        }
+
+        .button:hover,
+        .radio_button:hover {
+            background-color: #454742af;
+            border-bottom: 6px solid #A4874F;
+            cursor: pointer;
+        }
+
+        .button.selected,
+        .radio_button.selected {
+            background-color: #0B020D;
+            border-bottom: 6px solid #A4874F;
+        }
+
+        .button.selected:hover,
+        .radio_button.selected:hover {
+            background-color: #0b020da3;
+            border-bottom: 6px solid #A4874F;
+        }
+
+        .inputs {
+            background-color: #454742;
+            border-radius: 8px;
+            padding: 10px;
+            color: white;
+            border: none;
+            outline: none;
+        }
+
+        .inputs::placeholder {
+            color: #bbbbbb;
+        }
+
+        .container {
+            display: block;
+            position: relative;
+            padding-left: 25px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            font-size: 16px;
+            line-height: 1.5;
+            user-select: none;
+        }
+
+        .container input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        }
+
+        .checkmark {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 16px;
+            width: 16px;
+            background-color: #454742;
+        }
+
+        .container:hover input~.checkmark {
+            background-color: #454742bb;
+            cursor: pointer;
+        }
+
+        .container input:checked~.checkmark {
+            background-color: #B50C0F;
+        }
+
+        .checkmark:after {
+            content: "";
+            position: absolute;
+            display: none;
+        }
+
+        .container input:checked~.checkmark:after {
+            display: block;
+        }
+
+        .checkmark:after {
+            left: 5px;
+            top: 2px;
+            width: 3px;
+            height: 6px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+
+        .genre-container,
+        .decade-container,
+        .artist-container,
+        .song-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        #genreButtons,
+        #decadeButtons,
+        #selectedGenres,
+        #selectedDecades,
+        #selected-artists,
+        #selected-songs {
+            width: 45%;
+        }
+
+        #selectedGenres,
+        #selectedDecades,
+        #selected-artists,
+        #selected-songs {
+            padding-left: 20px;
+        }
+
+        #selectedGenres {
+            margin-top: -60px;
+        }
+
+        #selected-songs {
+            margin-top: -20px;
+        }
+
+        #selected-artists {
+            margin-top: -17.5px;
+        }
+
+        #selectedDecades {
+            margin-top: -55px;
+        }
+
+
+        #submit_button {
+            padding: 10px 20px;
+            border: none;
+            border-bottom: 6px solid #B50C0F;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            color: white;
+            background-color: #454742;
+            transition: background-color 0.4s ease;
+            margin-bottom: 10px;
+            margin-right: 10px;
+        }
+
+        #submit_button:hover {
+            background-color: #0B020D;
+            border-bottom: 6px solid #A4874F;
+            cursor: pointer;
+        }
+
+        label,
+        h3 {
+            font-size: 16px;
+            line-height: 1.5;
+            color: white;
+            text-shadow: 1px 1px 2px black;
+        }
+
+        #selectedGenres .button,
+        #selectedDecades .button,
+        #selected-artists .button,
+        #selected-songs .button {
+            margin-bottom: 10px;
+            margin-right: 10px;
+        }
+
+        .information {
+            font-size: x-small;
+        }
+
+        #information_genre,
+        #information_decade {
+            margin-top: -15px;
+        }
+
+        .sorting-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+            max-width: 50%;
+        }
+
+        .sorting-container .radio_button {
+            flex: 1 1 calc(33.33% - 20px);
+            box-sizing: border-box;
+        }
+
+        .slider-container {
+            text-align: left;
+            margin: 20px 0;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            max-width: 300px;
+            height: 8px;
+            background: linear-gradient(to right, #B50C0F 50%, #ddd 50%);
+            outline: none;
+            border-radius: 5px;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #B50C0F;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: #B50C0F;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+
+        .playlist-table {
+            width: 100%;
+            margin: 20px 0;
+            border-collapse: collapse;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 16px;
+            border-bottom: 1px solid #f2f2f2;
+        }
+
+        th {
+            background-color: #454742;
+            color: white;
+            text-transform: uppercase;
+        }
+
+        tr:nth-child(even) {
+            background-color: rgba(242, 242, 242, 0.674);
+        }
+
+        tr:hover {
+            background-color: #b50c0f;
+            color: #0b020d;
+        }
+
+        td {
+            font-size: 16px;
+            color: #333;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid white;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 10px auto;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="topnav">
+        <a href="{{ url_for('searchpage') }}">search</a>
+        <!-- url_for navigates to specific routes defined in app.py -->
+        <a href="{{ url_for('musicgame') }}">music game</a>
+        <a href="{{ url_for('statspage') }}">stats for you</a>
+        <a href="{{ url_for('plgen') }}">playlist generator</a>
+        <a href="{{ url_for('upcomingevents') }}">upcoming events</a>
+    </div>
+    <!-- Logo and FAQ labels -->
+    <a href="{{ url_for('faq') }}" class="faq-label">FAQ / How to Use</a>
+    <a class="logo" href="{{ url_for('home') }}"><b>Track'r</b></a>
+
+    <main>
+        <h1 class="title">Playlist Generator</h1>
+        <div class="content">
+            <div class="slider-container">
+                <label for="songCount"><b>Choose the number of songs in your playlist:</b></label>
+                <br>
+                <br>
+                <input type="range" id="material-slider" name="songCount" min="1" max="30" value="15">
+                <label for="songCount"><span id="slider-value">15/30</span></label>
+            </div>
+            <div class="artistler artist-container">
+                <div>
+                    <label for="artists"><b>Choose your favourite artist(s):</b></label>
+                    <br><br>
+                    <input type="text" id="artist-choose-input" class="inputs" placeholder="Choose Artist(s)...">
+                    <br><br>
+                    <button type="button" id="add-artist-button" class="button">Add Artist</button>
+                </div>
+                <div id="selected-artists">
+                    <h3>Selected Artists:</h3>
+                    <!-- selected artists-->
+                </div>
+            </div>
+            <div class="song-container">
+                <div>
+                    <label for="specific-songs"><b>Choose your favourite song(s):</b></label>
+                    <br><br>
+                    <input type="text" id="specific-songs-input" name="specific_songs" class="inputs"
+                        placeholder="Choose Song(s)...">
+                    <br><br>
+                    <button type="button" id="add-song-button" class="button">Add Song</button>
+                </div>
+                <div id="selected-songs">
+                    <h3>Selected Songs:</h3>
+                    <!-- selected songs-->
+                </div>
+            </div>
+            <div>
+                <label for="genres"><b>Choose your favourite genre(s):</b></label>
+                <br><br>
+                <div class="genre-container">
+                    <div id="genreButtons">
+                        <button type="button" class="button">hip-hop</button>
+                        <button type="button" class="button">pop</button>
+                        <button type="button" class="button">jazz</button>
+                        <button type="button" class="button">house</button>
+                        <button type="button" class="button">electronic</button>
+                        <button type="button" class="button">reggae</button>
+                        <button type="button" class="button">country</button>
+                        <button type="button" class="button">turkish</button>
+                        <button type="button" class="button">rock</button>
+                        <button type="button" class="button">metal</button>
+                        <button type="button" class="button">indie</button>
+                        <button type="button" class="button">latin</button>
+                        <button type="button" class="button">folk</button>
+                        <button type="button" class="button">alternative</button>
+                        <button type="button" class="button">punk</button>
+                        <button type="button" class="button">techno</button>
+                        <button type="button" class="button">classical</button>
+                    </div>
+                    <div id="selectedGenres">
+                        <h3>Selected Genres:</h3>
+                    </div>
+                </div>
+            </div>
+            <br>
+            <br>
+            <div>
+                <label for="decades"><b>Choose the decade(s):</b></label>
+                <br><br>
+                <div class="decade-container">
+                    <div id="decadeButtons">
+                        <button type="button" class="button" data-decade="1950">50s</button>
+                        <button type="button" class="button" data-decade="1960">60s</button>
+                        <button type="button" class="button" data-decade="1970">70s</button>
+                        <button type="button" class="button" data-decade="1980">80s</button>
+                        <button type="button" class="button" data-decade="1990">90s</button>
+                        <button type="button" class="button" data-decade="2000">2000s</button>
+                        <button type="button" class="button" data-decade="2010">2010s</button>
+                        <button type="button" class="button" data-decade="2020">2020s</button>
+                    </div>
+                    <div id="selectedDecades">
+                        <h3>Selected Decades:</h3>
+                    </div>
+                </div>
+            </div>
+            <br>
+            <br>
+            <div>
+                <label for="explicit"><b>Exclude explicit content:</b></label>
+                <br><br>
+                <label for="explicit" class="container">Exclude explicit content like sexual, violent, or offensive
+                    language.
+                    <input type="checkbox" id="explicit" name="explicit">
+                    <span class="checkmark"></span>
+                </label>
+            </div>
+            <br>
+            <div>
+                <label><b>Sorting preferences:</b></label>
+                <p id="information_preference" class="information"><i>(If you do not select anything, it will be
+                        randomized)</i></p>
+                <br>
+                <div class="sorting-container">
+                    <button type="button" class="radio_button" value="pop-H/L">Popularity (highest-lowest)</button>
+                    <button type="button" class="radio_button" value="pop-L/H">Popularity (lowest-highest)</button>
+                    <button type="button" class="radio_button" value="rd-H/L">Release Date (newest-oldest)</button>
+                    <button type="button" class="radio_button" value="rd-L/H">Release Date (oldest-newest)</button>
+                    <button type="button" class="radio_button" value="len-L/H">Length (shortest-longest)</button>
+                    <button type="button" class="radio_button" value="len-H/L">Length (longest-shortest)</button>
+                </div>
+            </div>
+            <br>
+            <br>
+            <div>
+                <label for="name-pl"><b>Insert the name of your playlist:</b></label>
+                <br><br>
+                <input type="text" id="name-pl-button" name="playlist_name" class="inputs" placeholder="Insert Name...">
+            </div>
+            <br>
+            <br>
+            <div>
+                <button type="button" id="submit_button" class="submit_button">Generate</button>
+            </div>
+            <br>
+            <br>
+        </div>
+    </main>
+    <div class="playlist-container">
+        <table id="songTable" class="playlist-table">
+            <thead>
+                <tr>
+                    <th>Song</th>
+                    <th>Artist</th>
+                    <th>Album</th>
+                    <th>Duration</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- song_list -->
+            </tbody>
+        </table>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const slider = document.getElementById('material-slider');
+            const sliderValue = document.getElementById('slider-value');
+
+            function updateSliderBackground(slider) {
+                const value = (slider.value - slider.min) / (slider.max - slider.min) * 100;
+                slider.style.background = `linear-gradient(to right, #B50C0F ${value}%, #ddd ${value}%)`;
+            }
+
+            slider.addEventListener('input', function () {
+                sliderValue.textContent = `${this.value} / 30`;
+                updateSliderBackground(this);
+            });
+
+            updateSliderBackground(slider);
+
+            const addArtistButton = document.getElementById('add-artist-button');
+            const artistInput = document.getElementById('artist-choose-input');
+            const selectedArtistsDiv = document.getElementById('selected-artists');
+
+            const addSongButton = document.getElementById('add-song-button');
+            const songInput = document.getElementById('specific-songs-input');
+            const selectedSongsDiv = document.getElementById('selected-songs');
+
+            const submitButton = document.getElementById('submit_button');
+
+            const selectedGenresDiv = document.getElementById('selectedGenres');
+            const selectedDecadesDiv = document.getElementById('selectedDecades');
+            const explicitCheckbox = document.getElementById('explicit');
+            const playlistNameInput = document.getElementById('name-pl-button');
+
+            const selectedArtists = [];
+            const selectedSongs = [];
+            const selectedGenres = [];
+            const selectedDecades = [];
+
+            addArtistButton.addEventListener('click', function () {
+                const artistName = artistInput.value.trim();
+                if (artistName) {
+                    fetch('/correct-artist', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ artist: artistName }),
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.corrected_name) {
+                                const artistButton = document.createElement('button');
+                                artistButton.className = 'button';
+                                artistButton.textContent = data.corrected_name;
+                                selectedArtistsDiv.appendChild(artistButton);
+                                selectedArtists.push(data.corrected_name);
+                                artistInput.value = '';
+
+                                artistButton.addEventListener('click', function () {
+                                    const index = selectedArtists.indexOf(data.corrected_name);
+                                    if (index > -1) {
+                                        selectedArtists.splice(index, 1);
+                                        selectedArtistsDiv.removeChild(artistButton);
+                                    }
+                                });
+                            } else {
+                                alert('Artist not found');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                        });
+                }
+            });
+
+            addSongButton.addEventListener('click', function () {
+                const songName = songInput.value.trim();
+                if (songName) {
+                    fetch('/correct-song', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ song: songName }),
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.corrected_song) {
+                                const songButton = document.createElement('button');
+                                songButton.className = 'button';
+                                songButton.textContent = data.corrected_song;
+                                selectedSongsDiv.appendChild(songButton);
+                                selectedSongs.push(data.corrected_song);
+                                songInput.value = '';
+
+                                songButton.addEventListener('click', function () {
+                                    const index = selectedSongs.indexOf(data.corrected_song);
+                                    if (index > -1) {
+                                        selectedSongs.splice(index, 1);
+                                        selectedSongsDiv.removeChild(songButton);
+                                    }
+                                });
+                            } else {
+                                alert('Song not found');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                        });
+                }
+            });
+
+            document.querySelectorAll('#genreButtons .button').forEach(button => {
+                button.addEventListener('click', function () {
+                    const genre = button.textContent;
+                    if (!selectedGenres.includes(genre)) {
+                        const genreButton = document.createElement('button');
+                        genreButton.className = 'button';
+                        genreButton.textContent = genre;
+                        selectedGenresDiv.appendChild(genreButton);
+                        selectedGenres.push(genre);
+                        button.style.display = 'none';
+
+                        genreButton.addEventListener('click', function () {
+                            const index = selectedGenres.indexOf(genre);
+                            if (index > -1) {
+                                selectedGenres.splice(index, 1);
+                                selectedGenresDiv.removeChild(genreButton);
+                                button.style.display = 'inline-block';
+                            }
+                        });
+                    }
+                });
+            });
+
+            document.querySelectorAll('#decadeButtons .button').forEach(button => {
+                button.addEventListener('click', function () {
+                    const decade = button.getAttribute('data-decade');
+                    if (!selectedDecades.includes(decade)) {
+                        const decadeButton = document.createElement('button');
+                        decadeButton.className = 'button';
+                        decadeButton.textContent = button.textContent;
+                        selectedDecadesDiv.appendChild(decadeButton);
+                        selectedDecades.push(parseInt(decade));
+                        button.style.display = 'none';
+
+                        decadeButton.addEventListener('click', function () {
+                            const index = selectedDecades.indexOf(parseInt(decade));
+                            if (index > -1) {
+                                selectedDecades.splice(index, 1);
+                                selectedDecadesDiv.removeChild(decadeButton);
+                                button.style.display = 'inline-block';
+                            }
+                        });
+                    }
+                });
+            });
+
+            document.querySelectorAll('.sorting-container .radio_button').forEach(button => {
+                button.addEventListener('click', function () {
+                    if (button.classList.contains('selected')) {
+                        button.classList.remove('selected');
+                    } else {
+                        document.querySelectorAll('.sorting-container .radio_button').forEach(btn => {
+                            btn.classList.remove('selected');
+                        });
+                        button.classList.add('selected');
+                    }
+                });
+            });
+
+            submitButton.addEventListener('click', function () {
+                const artists = selectedArtists;
+                const specific_songs = selectedSongs;
+                const exclude_explicit = explicitCheckbox.checked;
+                const genres = selectedGenres;
+                const decades = selectedDecades.map(Number);
+                const number_of_songs = parseInt(document.getElementById('material-slider').value);
+                const preferred_sorting = document.querySelector('.sorting-container .radio_button.selected')?.value || '';
+                const playlist_name = playlistNameInput.value.trim() || 'Playlist 1';
+
+                const status = document.createElement('div');
+                status.id = 'loading-status';
+                status.style.position = 'fixed';
+                status.style.top = '50%';
+                status.style.left = '50%';
+                status.style.transform = 'translate(-50%, -50%)';
+                status.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+                status.style.color = 'white';
+                status.style.padding = '20px';
+                status.style.borderRadius = '8px';
+                status.style.textAlign = 'center';
+                status.innerHTML = `
+                    <div>Loading... This might take a while</div>
+                    <div class="spinner"></div>
+                `;
+                document.body.appendChild(status);
+
+                fetch('/generate-playlist', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        artists,
+                        specific_songs,
+                        exclude_explicit,
+                        genres,
+                        decades,
+                        number_of_songs,
+                        preferred_sorting,
+                        playlist_name
+                    }),
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        const songTable = document.getElementById('songTable');
+                        const songTableBody = songTable.getElementsByTagName('tbody')[0];
+                        const songTableHead = songTable.getElementsByTagName('thead')[0];
+                        songTableBody.innerHTML = '';
+
+                        songTableHead.innerHTML = '';
+
+                        const playlistNameRow = songTableHead.insertRow(0);
+                        const playlistNameCell = playlistNameRow.insertCell(0);
+                        playlistNameCell.colSpan = 4;
+                        playlistNameCell.textContent = data.playlist_name;
+                        playlistNameCell.style.fontWeight = 'bold';
+                        playlistNameCell.style.textAlign = 'center';
+                        playlistNameCell.style.backgroundColor = '#454742';
+                        playlistNameCell.style.color = 'white';
+
+                        const headerRow = songTableHead.insertRow(1);
+                        const headers = ['Song', 'Artist', 'Album', 'Duration'];
+                        headers.forEach(headerText => {
+                            const cell = headerRow.insertCell();
+                            cell.textContent = headerText;
+                            cell.style.fontWeight = 'bold';
+                            cell.style.textAlign = 'center';
+                            cell.style.backgroundColor = '#454742';
+                            cell.style.color = 'white';
+                        });
+
+                        data.playlist.forEach(song => {
+                            const row = songTableBody.insertRow();
+                            const songCell = row.insertCell(0);
+                            const songLink = document.createElement('a');
+                            songLink.href = song.url;
+                            songLink.textContent = song.name;
+                            songLink.target = '_blank'; // Open link in a new tab
+                            songCell.appendChild(songLink);
+
+                            row.insertCell(1).textContent = song.artist;
+                            row.insertCell(2).textContent = song.album;
+                            row.insertCell(3).textContent = song.duration;
+                        });
+                        document.querySelector('.playlist-container').style.display = 'block';
+
+                        document.body.removeChild(status);
+
+                        document.querySelector('.playlist-container').scrollIntoView({ behavior: 'smooth' });
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        document.body.removeChild(status);
+                    });
+            });
+        });
+    </script>
+</body>
+
+</html>

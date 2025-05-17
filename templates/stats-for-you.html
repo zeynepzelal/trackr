@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="https://www.gstatic.com/charts/loader.js"></script>
+        <!-- importing google charts library -->
+        <style>
+            .track img {
+                transition: filter 0.2s ease;
+            }
+
+            .track img:hover {
+            filter: sepia(100%) brightness(105%) contrast(120%) drop-shadow(4px 4px 8px rgba(0, 0, 0, 0.5)) opacity(0.7);
+            }
+
+    </style>
+    <link rel="icon" type="image/x-icon" href="equalizer_40dp_FILL0_wght400_GRAD0_opsz40.png">
+    <title>Track'r - Stats for You</title>
+    </head>
+    
+<body>
+
+<style>
+    body {
+        background-color: #68817D;
+        margin: 0;
+    }
+
+    .button {
+        padding: 10px 20px;
+        border: none;
+        border-bottom: 6px solid #B50C0F;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        color: white;
+        background-color: #454742;
+        transition: background-color 0.4s ease;
+    }
+
+    .button:hover {
+        background-color: #0B020D;
+        border-bottom: 6px solid #A4874F
+    }
+
+    .track {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 2px;
+        opacity: 0;
+        animation: fadeIn 0.3s forwards;
+        flex: 1 1 25%;
+        max-width: 25%;
+    }
+
+    @keyframes fadeIn {
+        to {
+            opacity: 1;
+        }
+    }
+
+    @keyframes fadeOut {
+        from {
+            opacity: 1;
+        }
+        to {
+            opacity: 0;
+        }
+    }
+
+    .fade-out {
+        animation: fadeOut 0.3s forwards;
+    }
+
+    .extra-container {
+        text-align: center;
+    }
+
+    .button-container {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .button-container {
+        margin: 0 10px;
+        color: #0B020D
+    }
+
+    .tracks-cointer {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 5px;
+        margin-bottom: 10px;
+        margin-top: 10px;
+    }
+
+    .genreContainer {
+        margin: 20px auto;
+        text-align: center;
+    }
+
+    .artistContainer {
+        margin: 20px;
+        text-align: center;
+    }
+
+    .centeredContainer {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: row;
+        text-align: center;
+        margin-top: -65px;
+    }
+
+    .genreTitle {
+        margin-bottom: 20px;
+    }
+
+    .topnav {
+            background-color: #454742;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+        }
+
+    .topnav a {
+        color: #f2f2f2;
+        text-align: center;
+        padding: 14px 16px;
+        text-decoration: none;
+        font-size: 25px;
+    }
+
+    .topnav a:hover {
+        background-color: #B50C0F;
+        color: #0B020D;
+    }
+
+    .faq-label {
+            position: absolute;
+            top: 6px;
+            right: 20px;
+            background-color: #454742;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-family: Impact, 'Arial Narrow Bold', sans-serif;
+            font-size: 16px;
+            text-decoration: none;
+        }
+
+    .logo {
+        position: absolute;
+        top: 6px;
+        left: 20px;
+        background-color: #454742;
+        color: #A4874F;
+        padding: 10px 20px;
+        border-radius: 5px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-size: 20px;
+        text-shadow: 5px 0px black;
+    }
+
+    .artist {
+        font-style: italic;
+        font-size: 12px;
+        text-align: center;
+        margin-top: -15px;
+    }
+
+    .song {
+        text-align: center;
+    }
+
+
+</style>
+<!-- Top navigator by default (same in every page) -->
+<div class="topnav">
+    <a href="{{ url_for('searchpage') }}">search</a>
+    <!-- url_for navigates to specific routes defined in app.py -->
+    <a href="{{ url_for('musicgame') }}">music game</a>
+    <a href="{{ url_for('statspage') }}">stats for you</a>
+    <a href="{{ url_for('plgen') }}">playlist generator</a>
+    <a href="{{ url_for('upcomingevents') }}">upcoming events</a>
+</div>
+<!-- Logo and FAQ labels -->
+<a href="{{ url_for('faq') }}" class="faq-label">FAQ / How to Use</a>
+<a class="logo" href="{{ url_for('home') }}"><b>Track'r</b></a>
+
+<div class="extra-container">
+    <h2 style="font-size: 30px;">Your top tracks</h2>
+    <div class="button-container">
+    <!-- Buttons for displaying setting -->
+    <button id="monthTopTracks" class="button" type="button">By Month</button>
+    <button id="yearTopTracks" class="button" type="button">By 6 Months</button>
+    <button id="lifetimeTopTracks" class="button" type="button">By Year</button></div><br>
+    <!-- <span> shows displaying mode (initially 'click to display') -->
+    <span id="displayingTopTracks" style="font-size: large;"><b>Click to display!</b></span>
+    <div class="tracks-cointer"></div>
+
+    <script>
+        
+        /* event listeners for display setting buttons */
+        document.getElementById('monthTopTracks').addEventListener('click', function() {
+            document.getElementById('displayingTopTracks').innerHTML = `Now displaying: <b>month</b>`
+            /* call fetchTrackDetails function to update fetched data with specific time range depending on button */
+            fetchTrackDetails('short_term')
+        })
+        /* same as above ^ */
+        document.getElementById('yearTopTracks').addEventListener('click', function() {
+            document.getElementById('displayingTopTracks').innerHTML = 'Now displaying: <b>6 months</b>'
+            fetchTrackDetails('medium_term')
+        })
+        /* same as above ^ */
+        document.getElementById('lifetimeTopTracks').addEventListener('click', function() {
+            document.getElementById('displayingTopTracks').innerHTML = 'Now displaying: <b>year</b>'
+            fetchTrackDetails('long_term')
+        })
+
+        async function fetchTrackDetails(time_range) {
+            /* fetches track details via spotify api.
+            async function as data is awaited.
+            input: time_range -> specifies the range of time for the data fetched (can be short, medium or long) */
+            try {
+            /* 'try' for error handling */
+                const response = await fetch(`/getstats?time_range=${time_range}`);
+                /* awaits API response with specified time range */
+                const trackDetails = await response.json();
+                /* defines track details as json form of 'response' */
+
+                const container = document.querySelector('.tracks-cointer');
+                container.innerHTML = '';
+                /* initialize container as empty */
+
+                let trackIndex = 1
+                trackDetails.forEach(track => {
+                /* iterate through trackDetails array to set object properties for each track */
+                    const trackElement = document.createElement('div');
+                    /* create a div for each track element */
+                    trackElement.className = 'track';
+
+                    const trackHTML = `
+                        <a href="${track.song_link}" target="_blank"><img src="${track.album_cover}" alt="Album Cover" width="200"></a>
+                        <p style="font-size: 16px" class="song"><b>#${trackIndex}</b> ${track.name}</p>
+                        <p style="font-size: 14px" class="artist">${track.artists}</p>`
+                    /* define object properties */
+
+                    trackElement.innerHTML = trackHTML;
+                    /* set trackelement div's innerhtml to specified HTML with object properties */
+                    container.appendChild(trackElement);
+                    /* add div to container */
+                    trackIndex++
+                    /* track index is traced for song rank, incremented after each iteration of the trackDetails array */
+
+                });
+            } catch (error) {
+                console.error('Error fetching track details:', error);
+            }
+        }
+
+        const topArtistsInformation = []
+        /* initialize array for artist data */
+        async function fetchArtistDetails() {
+            /* fetches artist details via spotify api.
+            async function as data is awaited
+            */
+            try {
+                const response = await fetch('/getartiststats');
+                const artistDetails = await response.json();
+                /* same logic as fetchTrackDetails(), response is awaited and turned into json */
+
+                let artistIndex = 1
+                artistDetails.forEach(artist => {
+                    const artistObject = {
+                        name: artist.name,
+                        popularity: artist.popularity,
+                        genres: artist.genres,
+                        rank: artistIndex
+                    }
+                    /* similar logic to fetchTrackDetails(), instead of setting innerHTML of div, create object to be added to array */
+
+                    topArtistsInformation.push(artistObject)
+                    /* add object to array */
+                    artistIndex++
+                    /* artist index is traced for artist rank, incremented after each iteration of the artistDetails array */
+
+                });
+            } catch (error) {
+                console.error('Error fetching artist details:', error);
+            }
+        }
+
+        window.onload = () => fetchArtistDetails()
+        /* fetch the artist details upon window load, so gauge and top artists list is ready. */
+
+    </script>
+</div>
+    <script>
+
+    async function extractGenresData(artistInfo) {
+        /* function to extract genre information from the array of artist details. (via fetchArtistDetails())
+        async function as data fetchArtistDetails is required for genres to be extracted
+        input: artistInfo -> the array of artist details
+        returns: dataArray -> an array of arrays containing genre names as first elements
+            and amounts of times the genre appears in user's top items as second elements in the inner arrays */
+        await fetchArtistDetails()
+        /* fetchArtistDetails is awaited as it is required. the function runs upon the execution of fetchArtistDetails() */
+        let dataArray = [['Genre', 'Amount']];
+        /* initialization of dataArray with its first element (an inner array,
+        required for syntax of gauge display for google charts) */
+
+        let genreCounts = {};
+        /* initialize genreCounts as object */
+        artistInfo.forEach(function(artist) {
+        /* iterate through artistInfo array */
+            artist.genres.forEach(function(genre) {
+            /* iterate through genres array within the artistInfo array */
+                if (genreCounts[genre]) {
+                    genreCounts[genre]++;
+                    /* increment count if genre is already present in counts */
+                } else {
+                    genreCounts[genre] = 1;
+                    /* set to 1 if it isn't present already */
+                }
+            });
+        });
+
+        Object.keys(genreCounts).forEach(function(genre) {
+            /* iterate through the keys of the genreCounts object */
+            dataArray.push([genre, genreCounts[genre]]);
+            /* add the name of genre & amount of times the genre appears into dataArray */
+        });
+
+        return dataArray;
+    }
+
+    google.charts.load('current', {packages: ['corechart']});
+    /* load necessary chart packages */
+    google.charts.setOnLoadCallback(drawMostGenres);
+    /* specify function to be called upon */
+
+    async function drawMostGenres() {
+        /* function to draw top genres of user
+        async function as extractGenresData() needs to be awaited (information needs to be extracted for it to be drawn) */
+
+        const genresData = await extractGenresData(topArtistsInformation)
+        /* await extractGenresData */
+        const data = google.visualization.arrayToDataTable(genresData);
+        /* specify data array to be genresData (the returning item of extractGenresData())
+        this lets google charts know that the data we want to work with is 'genresData' */
+
+        const options = {
+        is3D: true,
+        backgroundColor: '#68817D'
+        };
+        /* options for the chart, specific syntax & method names by the google charts library */
+
+        const chart = new google.visualization.PieChart(document.getElementById('genreDiv'));
+        /* specify division for chart to be drawn in */
+        chart.draw(data, options);
+        /* draw chart (built-in method of google charts) */
+    }
+    </script>
+
+<p style="text-align: center; margin-bottom: 65px; font-size: 30px;"><b>Your top artists</b></p>
+<div class="centeredContainer">
+<div id="nichenessDiv" class="artistContainer"></div>
+<p id="artistList" style="white-space: pre-line; font-size: 20px;"></p></div>
+<p style="text-align: center; font-size: 30px;" class="genreTitle"><b>Your top genres</b></p>
+<div id="genreDiv" style="width: 1000px; height: 400px; margin-top: -10px;" class="genreContainer"></div>
+    <script>
+        google.charts.load('current', {'packages':['gauge']});
+        /* load necessary chart packages */
+        google.charts.setOnLoadCallback(drawChart);
+        /* specify function to be called upon */
+
+        function calculateNicheness(artistInfo) {
+            /* function to calculate 'nicheness' of user
+            'nicheness' refers to how much the user DOESN'T listen to popular artists.
+            input: artistInfo -> an array containing details of top artists of user 
+            returns: avgNicheness -> calculated average nicheness of user */
+
+            let sum = 0
+            /* initialize sum as 0 */
+            artistInfo.forEach(function(obj) {
+            /* iterate through artistInfo array */
+                sum += obj.popularity
+                /* add the popularity of the artist ('obj') to the sum */
+            })
+            let avgPopularity = sum / 20
+            /* divided by 10 for top ten artists, and divided by 2 for error handling (the artist information is duplicated) */
+            let avgNicheness = 100 - avgPopularity
+            /* reverse the data to get nicheness (spotify API presents us with artist POPULARITY. but nicheness is the
+            opposite of popularity, hence nicheness is equal to: maximum value - average popularity.
+            maximum value in this specific google chart is 100 (gauge)). */
+            return avgNicheness
+        }
+
+        function getRandomValue(normVal) {
+            /* function to get a random value very close to the actual nicheness value
+            this function is used in conjunction with the updateGauge() function to give off a dynamic animation feeling
+            for the gauge upon first entering the page. the ACTUAL nicheness average is not affected. 
+            input: normVal -> actual average nicheness of user 
+            returns: Math.round(randomValue * 10) / 10 -> a value very close to the actual average
+                nicheness value of user, randomized. */
+
+            let minVal = normVal - 2
+            /* minimum value of approximate & random value
+            this initializes the minimum offset from the actual nicheness avg. */ 
+            let maxVal = normVal + 2
+            /* maximum value of approximate & random value
+            this initializes the maximum offset from the actual nicheness avg. */ 
+            let randomValue = Math.random() * (maxVal - minVal) + minVal
+            /* defines the random value. */
+
+            return Math.round(randomValue * 10) / 10
+        }
+
+        function drawChart() {
+            /* function to draw the gauge display showing nicheness of user via calculating popularity of top artists of user. */
+
+        var data = google.visualization.arrayToDataTable([
+        /* specify data array to be the array below. */
+            ['Label', 'Value'],
+            /* specific syntax set by google charts.
+            shows the label (the text written in the middle of the gauge) and the value (avg. nicheness of user) */
+            ["Nicheness", calculateNicheness(topArtistsInformation)],
+            /* sets the nicheness 'Value' to be the returning variable of calculateNicheness() */
+        ]);
+
+        const options = {
+            width: 700, height: 300,
+            greenFrom: 0, greenTo: 25,
+            redFrom: 75, redTo: 100,
+            yellowFrom:25, yellowTo: 75,
+            minorTicks: 5, greenColor: 'red',
+            yellowColor: 'ffc300', redColor: '#67bc37'
+        };
+        /* options for the chart, specific syntax & method names by the google charts library */
+
+        var chart = new google.visualization.Gauge(document.getElementById('nichenessDiv'));
+        /* specify division for chart to be drawn in */
+
+            function updateGauge() {
+                /* function to update the gauge display/chart with the new value for nicheness.
+                this function is used in conjunction with the updateGauge() function to give off a dynamic animation feeling
+                for the gauge upon first entering the page. the ACTUAL nicheness average is not affected. */
+
+                const newValue = getRandomValue(calculateNicheness(topArtistsInformation))
+                /* set the new value using a function within a function. getRandomValue() gets a random value based on the
+                original average nicheness value calculated by calculateNicheness() */
+                data.setValue(0, 1, newValue)
+                /* update the data array to set the newValue of nicheness to be the value */
+                chart.draw(data, options)
+                /* draw chart (built-in method of google charts) */
+            }
+
+            const dynamicInterval = setInterval(updateGauge, 200)
+            /* define an interval for the gauge to update every 200ms so it looks like the gauge is 'dynamic' (animation) */
+
+            setTimeout(function() {
+                clearInterval(dynamicInterval)
+            }, 8000)
+            /* set timeout of the dynamic animation interval and clear it after 8000ms (8 seconds)
+            basically ends the animation after 8 seconds have passed so the gauge seems to have 'stabilized' */
+
+            setTimeout(function() {
+                data.setValue(0, 1, calculateNicheness(topArtistsInformation))
+                chart.draw(data, options)
+            }, 8001)
+            /* right after animation has stopped (at the 8001st ms) update the gauge one last time to display the
+            ACTUAL average nicheness of user.
+            this sets the data array's value of nicheness back to the actual average value, and draws the chart again */
+            
+        }
+    </script>
+
+
+<script>
+    async function getTopArtists(artistInfo) {
+        /* function to process top artists and display the list of top artists next to the gauge chart display
+        async function as artist information is needed for the function to execute properly (fetchArtistDetails() is awaited).
+        input: artistInfo -> an array containing details of top artists of user */
+
+        await fetchArtistDetails()
+        /* fetchArtistDetails() is awaited before function can execute */
+        var displayTextArtists = ''
+        /* initialize the display text */
+        let artist_iterations = 0
+        /* initialize iteration count */
+        artistInfo.forEach(function(obj) {
+        /* iterate through the artistInfo array */
+            if (artist_iterations < 10) {
+            /* get the top 10 artists. (iterates only for the top 10)
+            additionally, the number is not 9 as index 0 is the first element */
+            displayTextArtists += `<b>${obj.rank}.</b> ${obj.name} \n`
+            /* add artist names to the initialized displayTextArtists string */
+            artist_iterations++
+            /* increment iteration count.
+            iteration count is traced to determine rank of artist. */
+            }
+        })
+        document.getElementById('artistList').innerHTML = displayTextArtists
+        /* set the innerHTML of artistList to the string containing a list of top artists */
+
+    }
+    getTopArtists(topArtistsInformation)
+    /* call function with the topArtistsInformation (return of fetchArtistDetails()) */
+</script>
+</body>      
+</html>
