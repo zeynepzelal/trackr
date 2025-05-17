@@ -14,7 +14,7 @@ import random
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
 #Define app
-app.secret_key = '1fb1c1341aa949b99b7b51d1f80122da'
+app.secret_key = ''
 SPOTIPY_CLIENT_ID = ''
 SPOTIPY_CLIENT_SECRET = ''
 SPOTIPY_REDIRECT_URI = 'http://127.0.0.1:5000/callback'
@@ -25,7 +25,7 @@ TOKEN_URL = 'https://accounts.spotify.com/api/token'
 API_BASE_URL = 'https://api.spotify.com/v1/'
 #Define base URLs for API
 
-TICKETMASTER_API_KEY = 'O8UPym1TTLSMY0bg7A2OF3h2gK2ZUfD3'
+TICKETMASTER_API_KEY = ''
 #Define Ticketmaster API key for events
 
 def get_token():
